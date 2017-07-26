@@ -21,7 +21,7 @@ The main design principles are:
 
  - **Minimal dependencies:** The core class only depends on
    C++11 and [Eigen][eg]. The JSON parser to read in NNs also requires
-   boost [PropertyTree][pt]. The converter requires Python3 and `h5py`.
+   boost [PropertyTree][pt]. The converter requires Python3 and `h5py`[^1].
  - **Easy to extend:** Should cover 95% of deep network architectures we
    would realistically consider.
  - **Hard to break:** The NN constructor checks the input NN for
@@ -32,7 +32,7 @@ JSON format. Currently the following formats are supported:
  - [AGILEPack][ap]
  - [Keras][kr] (most popular, see below)
 
-<sup>Conversion requiring `h5py` and `python3` can be done in any offline environment.</sup>
+[^1]: Conversion requiring `h5py` and `python3` can be done in any offline environment.
 
 [eg]: http://eigen.tuxfamily.org
 [pt]: http://www.boost.org/doc/libs/1_59_0/doc/html/property_tree.html
@@ -40,36 +40,44 @@ JSON format. Currently the following formats are supported:
 [kr]: http://keras.io/
 
 Quick Start With Model API
------------
+--------------------------
+
 The following instructions apply to the model/functional API in Keras. To see the instructions relevant to the sequential API, go to [Quick Start With sequential API][seqQuickStart].
 
 After running `make`, there are some required steps:
 
-##### 1) Save your network output file
-Make sure you saved your architecture and weights file from Keras, and created your input variable
-file. See [the lwtnn Keras Converter wiki page][weightsInputs] for the _correct_ procedure in doing all of this.
+ 1. Save your network output file
 
-Then
-```
-lwtnn/converters/kerasfunc2json.py architecture.json weights.h5 inputs.json > neural_net.json
-```
-<sup>Helpful hint: if you do `lwtnn/converters/kerasfunc2json.py architecture.json weights.h5` it creates a skeleton of an input file for you, which can be used in the above command!</sup>
+    Make sure you saved your architecture and weights file from Keras,
+    and created your input variable file. See
+    [the lwtnn Keras Converter wiki page][weightsInputs] for the
+    _correct_ procedure in doing all of this[^2].
 
-##### 2) Test your saved output file
-A good idea is to test your converted network:
-```
-./lwtnn-test-lightweight-graph neural_net.json
-```
+    Then
+    ```
+    lwtnn/converters/kerasfunc2json.py architecture.json weights.h5 inputs.json > neural_net.json
+    ```
 
-A basic regression test is performed with a bunch of random
-numbers. This test just ensures that lwtnn can in fact read your NN.
+[^2]: Helpful hint: if you do `lwtnn/converters/kerasfunc2json.py
+    architecture.json weights.h5` it creates a skeleton of an input
+    file for you, which can be used in the above command!
+
+ 2. Test your saved output file
+
+    A good idea is to test your converted network:
+    ```
+    ./lwtnn-test-lightweight-graph neural_net.json
+    ```
+
+    A basic regression test is performed with a bunch of random
+    numbers. This test just ensures that lwtnn can in fact read your NN.
 
 [weightsInputs]: https://github.com/lwtnn/lwtnn/wiki/Keras-Converter
 [seqQuickStart]: https://github.com/lwtnn/lwtnn/wiki/Quick-Start-With-Sequential-API
 
-##### 3) Apply your saved neural network within C++ code
+ 3. Apply your saved neural network within C++ code
 
-```C++
+    ```C++
 // Include several headers. See the files for more documentation.
 // First include the class that does the computation
 #include "lwtnn/LightweightGraph.hh"
