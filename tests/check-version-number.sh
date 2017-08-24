@@ -39,7 +39,7 @@ GIT_TAG_NUMBER=$(egrep -o '[0-9.]+' <<< $GIT_TAG)
 
 # check that there's only one number
 ERROR="git tag ${GIT_TAG} contains too many numbers"
-if [[ $(wc -w <<< $GIT_TAG_NUMBER) != 1 ]]; then
+if (( $(wc -w <<< $GIT_TAG_NUMBER) != 1 )); then
     exit 1
 fi
 
@@ -55,8 +55,8 @@ CMAKE_PROJECT=$(egrep "project *\(.*\)" CMakeLists.txt)
 
 # Get the version number
 ERROR="Can't parse CMake project name from '${CMAKE_PROJECT}'"
-CMAKE_TAG=$(sed -n -r 's/.*VERSION * ([0-9\.]+).*/\1/p' <<< $CMAKE_PROJECT)
-if [[ $(wc -w <<< $CMAKE_TAG) != 1 ]]; then
+CMAKE_TAG=$(sed -n 's/.*VERSION * \([0-9\.]*\).*/\1/p' <<< $CMAKE_PROJECT)
+if (( $(wc -w <<< $CMAKE_TAG) != 1 )); then
     exit 1
 fi
 
