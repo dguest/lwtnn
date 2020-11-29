@@ -9,20 +9,15 @@
 namespace lwt {
 namespace generic {
 
-  template<typename T>
-  using NodeVec = FastGraph::NodeVec<T>;
-  template<typename T>
-  using SeqNodeVec = FastGraph::SeqNodeVec<T>;
-
   namespace internal {
     template<typename T>
-    using FIP = atlas::FastInputPreprocessor<T>;
+    using FIP = FastInputPreprocessor<T>;
     template<typename T>
-    using FIVP = atlas::FastInputVectorPreprocessor<T>;
+    using FIVP = FastInputVectorPreprocessor<T>;
     template<typename T>
-    using FastPreprocs = std::vector<FIP*>;
+    using FastPreprocs = std::vector<FIP<T>*>;
     template<typename T>
-    using FastVecPreprocs = std::vector<IVP*>;
+    using FastVecPreprocs = std::vector<FIVP<T>*>;
   }
 
 namespace internal {
@@ -41,21 +36,23 @@ namespace internal {
   private:
     const NodeVec<T>& m_nodes;
     const SeqNodeVec<T>& m_seqs;
-    const Preprocs<T>& m_preprocs;
-    const VecPreprocs<T>& m_vec_preprocs;
+    const FastPreprocs<T>& m_preprocs;
+    const FastVecPreprocs<T>& m_vec_preprocs;
     const SourceIndices& m_input_indices;
   };
 
   template<typename T>
-  LazySource<T>::LazySource(const NodeVec<T>& n, const SeqNodeVec<T>& s,
-                            const Preprocs<T>& p, const VecPreprocs<T>& v,
-                            const SourceIndices<T>& i):
+  LazySource<T>::LazySource(const NodeVec<T>& n,
+                            const SeqNodeVec<T>& s,
+                            const FastPreprocs<T>& p,
+                            const FastVecPreprocs<T>& v,
+                            const SourceIndices& i):
     m_nodes(n), m_seqs(s), m_preprocs(p), m_vec_preprocs(v),
     m_input_indices(i)
   {
   }
   template<typename T>
-  VectorX<t> LazySource<T>::at(size_t index) const
+  VectorX<T> LazySource<T>::at(size_t index) const
   {
     const auto& preproc = *m_preprocs.at(index);
     size_t source_index = m_input_indices.scalar.at(index);
@@ -99,6 +96,7 @@ namespace internal {
                           std::string default_output):
     m_graph(new Graph<T>(config.nodes, config.layers))
   {
+    using namespace internal;
 
     m_input_indices.scalar = get_node_indices(
       order.scalar, config.inputs);
@@ -152,11 +150,13 @@ namespace internal {
   }
   template<typename T>
   VectorX<T> FastGraph<T>::compute(const NodeVec<T>& nodes,
-                                const SeqNodeVec<T>& seq,
-                                size_t idx) const {
+                                   const SeqNodeVec<T>& seq,
+                                   size_t idx) const {
+    using namespace internal;
     LazySource<T> source(nodes, seq, m_preprocs, m_vec_preprocs,
                          m_input_indices);
     return m_graph->compute(source, idx);
   }
 
-}
+} // namespace generic
+} // namespace lwt

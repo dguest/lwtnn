@@ -729,11 +729,24 @@ namespace generic {
 
   // ________________________________________________________________________
   // utility functions
+
+  // check to see if the base type of the NN can be assigned to
+  template<typename T1, typename T2>
+  struct conversion_check {
+    static const bool value = (
+      std::is_same<T1, T2>::value ||
+      std::is_assignable<T1, T2>::value || (
+        std::is_convertible<T2, T1>::value &&
+        std::is_floating_point<T1>::value &&
+        std::is_floating_point<T2>::value
+        )
+      );
+  };
+
   template<typename T1, typename T2>
   MatrixX<T1> build_matrix(const std::vector<T2>& weights, size_t n_inputs)
   {
-    static_assert( std::is_same<T1, T2>::value ||
-                   std::is_assignable<T1, T2>::value,
+    static_assert( conversion_check<T1,T2>::value,
                    "T2 cannot be implicitly assigned to T1" );
 
     size_t n_elements = weights.size();
@@ -757,8 +770,7 @@ namespace generic {
   template<typename T1, typename T2>
   VectorX<T1> build_vector(const std::vector<T2>& bias)
   {
-    static_assert( std::is_same<T1, T2>::value ||
-                   std::is_assignable<T1, T2>::value,
+    static_assert( conversion_check<T1,T2>::value,
                    "T2 cannot be implicitly assigned to T1" );
 
     VectorX<T1> out(bias.size());

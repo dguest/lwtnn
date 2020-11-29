@@ -2,16 +2,24 @@
 #define LWTNN_UTILS_FAST_GRAPH_H
 
 #include "lwtnn/lightweight_network_config.hh"
+#include "lwtnn/generic/eigen_typedefs.hh"
 
 #include <Eigen/Dense>
 
 namespace lwt {
+
+  struct InputOrder;
+
 namespace generic {
 
   template<typename T> class Graph;
   template<typename T> class FastInputPreprocessor;
   template<typename T> class FastInputVectorPreprocessor;
-  struct InputOrder;
+
+  template<typename T>
+  using NodeVec = std::vector<VectorX<T>>;
+  template<typename T>
+  using SeqNodeVec = std::vector<MatrixX<T>>;
 
   namespace internal {
     struct SourceIndices
@@ -26,10 +34,6 @@ namespace generic {
   class FastGraph
   {
   public:
-    // Since a graph has multiple input nodes, we actually call
-    typedef std::vector<Eigen::VectorX<T>> NodeVec;
-    typedef std::vector<Eigen::MatrixX<T>> SeqNodeVec;
-
 
     // In cases where the graph has multiple outputs, we have to
     // define a "default" output, so that calling "compute" with no
@@ -42,10 +46,10 @@ namespace generic {
     FastGraph& operator=(FastGraph&) = delete;
 
     // The simpler "compute" function
-    Eigen::VectorX<T> compute(const NodeVec&, const SeqNodeVec& = {}) const;
+    VectorX<T> compute(const NodeVec<T>&, const SeqNodeVec<T>& = {}) const;
 
     // the other "compute" which allows you to select an arbitrary output
-    Eigen::VectorX<T> compute(const NodeVec&, const SeqNodeVec&, size_t) const;
+    VectorX<T> compute(const NodeVec<T>&, const SeqNodeVec<T>&, size_t) const;
 
   private:
     typedef FastInputPreprocessor<T> IP;

@@ -201,6 +201,7 @@ lwtnn_add_executable( lwtnn-test-arbitrary-net )
 lwtnn_add_executable( lwtnn-test-graph )
 lwtnn_add_executable( lwtnn-test-lightweight-graph )
 lwtnn_add_executable( lwtnn-test-rnn )
+lwtnn_add_executable( lwtnn-test-fastgraph )
 
 # Install the converter scripts.
 install( FILES
