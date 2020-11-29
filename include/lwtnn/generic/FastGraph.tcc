@@ -69,11 +69,11 @@ namespace internal {
   {
     const auto& preproc = *m_vec_preprocs.at(index);
     size_t source_index = m_input_indices.sequence.at(index);
-    if (source_index >= m_nodes.size()) {
+    if (source_index >= m_seqs.size()) {
       throw NNEvaluationException(
         "The NN needs an input MatrixXd at position "
         + std::to_string(source_index) + " but only "
-        + std::to_string(m_nodes.size()) + " inputs were given");
+        + std::to_string(m_seqs.size()) + " inputs were given");
     }
     return preproc(m_seqs.at(source_index));
   }
