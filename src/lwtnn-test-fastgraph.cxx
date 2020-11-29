@@ -1,5 +1,7 @@
 // Use example for LightweightGraph, the high level wrapper for Graph
 
+#include "test_utilities.hh"
+
 #include "lwtnn/generic/FastGraph.hh"
 #include "lwtnn/parse_json.hh"
 #include "lwtnn/Exceptions.hh"
@@ -14,8 +16,14 @@
 #include <cassert>
 
 namespace {
+  lwt::order_t get_input_names(const std::vector<lwt::InputNodeConfig>& cfg);
   template<typename T>
   int run_on(const lwt::GraphConfig& config, const std::string& = "");
+  template<typename T>
+  lwt::VectorX<T> get_input_vec(const std::vector<lwt::Input>& inputs);
+  template<typename T>
+  lwt::MatrixX<T> get_input_mat(const std::vector<lwt::Input>& inputs,
+                                size_t n_patterns);
 }
 
 
@@ -43,18 +51,6 @@ int main(int argc, char* argv[]) {
 }
 namespace {
 
-  lwt::order_t get_input_names(const std::vector<lwt::InputNodeConfig>& cfg) {
-    lwt::order_t out;
-    for (const auto& node: cfg) {
-      std::vector<std::string> names;
-      for (const auto& input: node.variables) {
-        names.emplace_back(input.name);
-      }
-      out.emplace_back(node.name, names);
-    }
-    return out;
-  }
-
   template<typename T>
   int run_on(const lwt::GraphConfig& config,
              const std::string& more_info) {
@@ -68,12 +64,12 @@ namespace {
     lwt::generic::FastGraph<T> tagger(config, order);
 
     std::vector<lwt::VectorX<T>> scalars;
-    for (const auto& scalar: order.scalar) {
-      scalars.push_back(lwt::VectorX<T>(scalar.second.size()));
+    for (const auto& scalar: config.inputs) {
+      scalars.push_back(get_input_vec<T>(scalar.variables));
     }
     std::vector<lwt::MatrixX<T>> sequences;
-    for (const auto& seq: order.sequence) {
-      sequences.push_back(lwt::MatrixX<T>(seq.second.size(),20));
+    for (const auto& seq: config.input_sequences) {
+      sequences.push_back(get_input_mat<T>(seq.variables,20));
     }
     std::cout << "running with " << order.scalar.size() << " scalars, and "
               << order.sequence.size() << " sequences" << more_info
@@ -86,6 +82,41 @@ namespace {
     std::cout << std::endl;
 
     return 0;
+  }
+
+  lwt::order_t get_input_names(const std::vector<lwt::InputNodeConfig>& cfg) {
+    lwt::order_t out;
+    for (const auto& node: cfg) {
+      std::vector<std::string> names;
+      for (const auto& input: node.variables) {
+        names.emplace_back(input.name);
+      }
+      out.emplace_back(node.name, names);
+    }
+    return out;
+  }
+
+  template<typename T>
+  lwt::VectorX<T> get_input_vec(const std::vector<lwt::Input>& inputs) {
+    size_t n_inputs = inputs.size();
+    lwt::VectorX<T> out(n_inputs);
+    for (size_t nnn = 0; nnn < n_inputs; nnn++) {
+      out(nnn) = ramp(inputs.at(nnn), nnn, n_inputs);
+    }
+    return out;
+  }
+  template<typename T>
+  lwt::MatrixX<T> get_input_mat(const std::vector<lwt::Input>& inputs,
+                                size_t n_patterns) {
+    size_t n_inputs = inputs.size();
+    lwt::MatrixX<T> out(n_inputs, n_patterns);
+    for (size_t nnn = 0; nnn < n_inputs; nnn++) {
+      const auto& input = inputs.at(nnn);
+      for (size_t jjj = 0; jjj < n_patterns; jjj++) {
+        out(nnn,jjj) = ramp(input, nnn, jjj, n_inputs, n_patterns);
+      }
+    }
+    return out;
   }
 
 }
