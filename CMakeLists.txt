@@ -112,13 +112,17 @@ set( lib_headers
    include/lwtnn/generic/Graph.tcc
    include/lwtnn/generic/InputPreprocessor.hh
    include/lwtnn/generic/InputPreprocessor.tcc
-   include/lwtnn/generic/LightweightNeuralNetwork.hh 
+   include/lwtnn/generic/LightweightNeuralNetwork.hh
    include/lwtnn/generic/LightweightNeuralNetwork.tcc
    include/lwtnn/generic/Stack.hh
    include/lwtnn/generic/Stack.tcc
    include/lwtnn/generic/Source.hh
    include/lwtnn/generic/LightweightGraph.hh
    include/lwtnn/generic/LightweightGraph.tcc
+   include/lwtnn/generic/FastInputPreprocessor.hh
+   include/lwtnn/generic/FastInputPreprocessor.tcc
+   include/lwtnn/generic/FastGraph.hh
+   include/lwtnn/generic/FastGraph.tcc
    include/lwtnn/Exceptions.hh
    include/lwtnn/LightweightNeuralNetwork.hh
    include/lwtnn/NNLayerConfig.hh
@@ -132,6 +136,8 @@ set( lib_sources
    src/LightweightNeuralNetwork.cxx
    src/LightweightGraph.cxx
    src/NanReplacer.cxx
+   src/FastInputPreprocessor.cxx
+   src/FastGraph.cxx
    src/Stack.cxx
    src/lightweight_nn_streamers.cxx
    src/parse_json.cxx
