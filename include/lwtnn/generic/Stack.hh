@@ -332,6 +332,7 @@ namespace generic
   template<typename T> T nn_hard_sigmoid( T x );
   template<typename T> T nn_tanh( T x );
   template<typename T> T nn_relu( T x );
+  template<> float nn_relu(float x);
 
   template<typename T>
   class ELU

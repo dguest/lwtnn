@@ -698,9 +698,12 @@ namespace generic {
 
   template<typename T>
   T nn_relu( T x) {
+    static_assert(!std::is_same<T,float>::value,
+                  "this should not be called on float");
     if (std::isnan(static_cast<double>(x))) return x;
     else return x > 0 ? x : 0;
   }
+  // float overload is in Stack.cxx
 
   template<typename T>
   ELU<T>::ELU(T alpha):
