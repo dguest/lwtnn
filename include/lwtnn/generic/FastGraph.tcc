@@ -15,9 +15,9 @@ namespace generic {
     template<typename T>
     using FIVP = FastInputVectorPreprocessor<T>;
     template<typename T>
-    using FastPreprocs = std::vector<FIP<T>*>;
+    using FastPreprocs = std::vector<FIP<T>>;
     template<typename T>
-    using FastVecPreprocs = std::vector<FIVP<T>*>;
+    using FastVecPreprocs = std::vector<FIVP<T>>;
   }
 
 namespace internal {
@@ -54,7 +54,7 @@ namespace internal {
   template<typename T>
   VectorX<T> LazySource<T>::at(size_t index) const
   {
-    const auto& preproc = *m_preprocs.at(index);
+    const auto& preproc = m_preprocs.at(index);
     size_t source_index = m_input_indices.scalar.at(index);
     if (source_index >= m_nodes.size()) {
       throw NNEvaluationException(
@@ -67,7 +67,7 @@ namespace internal {
   template<typename T>
   MatrixX<T> LazySource<T>::matrix_at(size_t index) const
   {
-    const auto& preproc = *m_vec_preprocs.at(index);
+    const auto& preproc = m_vec_preprocs.at(index);
     size_t source_index = m_input_indices.sequence.at(index);
     if (source_index >= m_seqs.size()) {
       throw NNEvaluationException(
@@ -94,7 +94,7 @@ namespace internal {
   template<typename T>
   FastGraph<T>::FastGraph(const GraphConfig& config, const InputOrder& order,
                           std::string default_output):
-    m_graph(new Graph<T>(config.nodes, config.layers))
+    m_graph(config.nodes, config.layers)
   {
     using namespace internal;
 
@@ -108,15 +108,13 @@ namespace internal {
       const lwt::InputNodeConfig& node = config.inputs.at(i);
       size_t input_node = m_input_indices.scalar.at(i);
       std::vector<std::string> varorder = order.scalar.at(input_node).second;
-      m_preprocs.emplace_back(
-        new FastInputPreprocessor<T>(node.variables, varorder));
+      m_preprocs.emplace_back(node.variables, varorder);
     }
     for (size_t i = 0; i < config.input_sequences.size(); i++) {
       const lwt::InputNodeConfig& node = config.input_sequences.at(i);
       size_t input_node = m_input_indices.sequence.at(i);
       std::vector<std::string> varorder = order.sequence.at(input_node).second;
-      m_vec_preprocs.emplace_back(
-        new FastInputVectorPreprocessor<T>(node.variables, varorder));
+      m_vec_preprocs.emplace_back(node.variables, varorder);
     }
     if (default_output.size() > 0) {
       if (!config.outputs.count(default_output)) {
@@ -132,15 +130,6 @@ namespace internal {
 
   template<typename T>
   FastGraph<T>::~FastGraph() {
-    delete m_graph;
-    for (auto& preproc: m_preprocs) {
-      delete preproc;
-      preproc = 0;
-    }
-    for (auto& preproc: m_vec_preprocs) {
-      delete preproc;
-      preproc = 0;
-    }
   }
 
   template<typename T>
@@ -155,7 +144,7 @@ namespace internal {
     using namespace internal;
     LazySource<T> source(nodes, seq, m_preprocs, m_vec_preprocs,
                          m_input_indices);
-    return m_graph->compute(source, idx);
+    return m_graph.compute(source, idx);
   }
 
 } // namespace generic
